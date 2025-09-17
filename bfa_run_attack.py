@@ -13,7 +13,7 @@ import torch.nn.functional as F
 
 # 1.准备数据集
 input_dir = './dataset/imagenet_val_1000'
-output_dir = './output/fia_result'
+output_dir = './output/bfa_result'
 targeted = False  # 是否进行有目标攻击
 target_class = None  # 如果是有目标攻击，指定目标类别
 eval_mode = False  # 是否评估模式
@@ -23,7 +23,7 @@ dataset = AdvDataset(input_dir=input_dir, output_dir=output_dir, targeted=target
 data_loader = DataLoader(dataset, batch_size=1, shuffle=False)  # 每次只针对一张图单独生成扰动
 
 # 2.加载攻击类
-attack_name = 'fia'  # 指定攻击方法
+attack_name = 'bfa'  # 指定攻击方法
 AttackClass = load_attack_class(attack_name)  # 加载对应的攻击类
 
 # 3.代理模型
@@ -35,9 +35,8 @@ loss = 'crossentropy'  # 攻击的损失函数
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 实例化代理模型的攻击
-attack = AttackClass(surrogate_model_name, epsilon, alpha=1.6 / 255, epoch=10, decay=1., num_ens=30, targeted=targeted,
-                     random_start=random_start, feature_layer='layer2', norm=norm, loss=loss, device=device,
-                     attack='FIA', drop_rate=0.3)
+attack = AttackClass(surrogate_model_name, epsilon=16/255, alpha=1.6/255, epoch=10, decay=1., eta=28, num_ens=30,
+                 targeted=False, random_start=False, layer_name='layer2.1', norm='linfty', loss='crossentropy', device=None, attack='BFA')
 
 # 4.被攻击模型
 target_model_name = 'resnet50'
